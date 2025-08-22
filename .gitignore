@@ -2,3 +2,6 @@
 vendor/
 /whoami
 dist/
+.DS_Store
+.git 2/.DS_Store
+/.git 2

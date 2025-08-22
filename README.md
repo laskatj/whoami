@@ -148,3 +148,64 @@ services:
        - --port=2001
        - --name=iamfoo
 ```
+
+## Health Check
+
+The whoami container includes a lightweight health check binary that uses Go's built-in HTTP client to verify the container's health status.
+
+### Built-in Health Check
+
+The container automatically includes a health check that runs every 30 seconds:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD ["/healthcheck"]
+```
+
+### Docker Compose Usage
+
+```yml
+version: '3.9'
+
+services:
+  whoami:
+    build: .
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+```
+
+### Custom Health Check Parameters
+
+The health check binary supports configurable parameters:
+
+```bash
+# Default: checks http://localhost:80/health with 5s timeout and 3 retries
+/healthcheck
+
+# Custom URL, timeout, and retry settings
+/healthcheck -url=http://localhost:80/health -timeout=3s -retries=2
+
+# Available flags:
+#   -url      Health check URL (default: http://localhost:80/health)
+#   -timeout  Request timeout (default: 5s)
+#   -retries  Number of retries (default: 3)
+#   -interval Retry interval (default: 1s)
+```
+
+### Manual Health Check
+
+You can also run the health check manually from within the container:
+
+```bash
+docker exec <container_name> /healthcheck
+```
+
+The health check will exit with:
+- **Exit code 0**: Container is healthy
+- **Exit code 1**: Container is unhealthy

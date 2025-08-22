@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  whoami:
+    build: .
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    environment:
+      - WHOAMI_NAME=whoami-healthy
+      - WHOAMI_PORT_NUMBER=80
+
+  # Example with custom health check parameters
+  whoami-custom:
+    build: .
+    ports:
+      - "8081:80"
+    healthcheck:
+      test: ["CMD", "/healthcheck", "-url=http://localhost:80/health", "-timeout=3s", "-retries=2"]
+      interval: 15s
+      timeout: 5s
+      retries: 2
+      start_period: 3s
+    environment:
+      - WHOAMI_NAME=whoami-custom
+      - WHOAMI_PORT_NUMBER=80

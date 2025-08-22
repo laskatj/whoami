@@ -14,6 +14,8 @@ RUN GO111MODULE=on GOPROXY=https://proxy.golang.org go mod download
 COPY . .
 
 RUN make build
+# Build health check binary
+RUN make healthcheck
 
 # Create a minimal container to run a Golang static binary
 FROM scratch
@@ -21,6 +23,10 @@ FROM scratch
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/whoami/whoami .
+COPY --from=builder /go/whoami/healthcheck /healthcheck
 
 ENTRYPOINT ["/whoami"]
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD ["/healthcheck"]
